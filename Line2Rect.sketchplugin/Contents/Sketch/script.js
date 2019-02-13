@@ -76,7 +76,7 @@ function addRectFromLine(l, context_) {
 
     var rect = MSRectangleShape.alloc().init();
     rect.frame = MSRect.rectWithRect(NSMakeRect(rx, ry, rw, rh));
-    rect.name = "testing";
+    rect.name = "RechtLine";
 
     var fill = rect.style().addStylePartOfType(0);
     fill.color = MSImmutableColor.colorWithSVGString("#d8d8d8");
