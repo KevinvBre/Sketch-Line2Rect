@@ -23,39 +23,39 @@ let td = NSThread.mainThread().threadDictionary();
 */
 
 // triggers on 'l' hit by user
-function InsertLine(context_){
+function InsertLine(context_) {
     td.lineState = 'true';
     td.lineCount = 0;
-    context_.actionContext.document.showMessage("Line drawn");//debugging
- }
+    // context_.actionContext.document.showMessage("Line drawn");//debugging
+}
 
 
-function SelectionChanged(context_){
-     if(td.lineCount == 1){
+function SelectionChanged(context_) {
+    if (td.lineCount == 1) {
         td.lineState = 'false';
         td.lineCount = 0;
 
         var l = context_.actionContext.oldSelection[0];
         // thanks
         // https://sketchplugins.com/d/389-x1-x2-y1-y2-values-from-a-line/5
-        if(l.x1() == l.x2()){
+        if (l.x1() == l.x2()) {
             addRectFromLine(l, context_);
             // context_.actionContext.document.showMessage("vertical line");
-        }else if(l.y1() == l.y2()){
+        } else if (l.y1() == l.y2()) {
             addRectFromLine(l, context_);
             // context_.actionContext.document.showMessage("horizontal line");
-        }else{
+        } else {
             // context_.actionContext.document.showMessage("not a straight line");
         }
 
 
 
         ga(context_, "Line2RectComp");
-     }
-     if(td.lineState == 'true'){
-            // context_.actionContext.document.showMessage("SelectionChanged drawn1");
-            td.lineCount = 1;
-     }
+    }
+    if (td.lineState == 'true') {
+        // context_.actionContext.document.showMessage("SelectionChanged drawn1");
+        td.lineCount = 1;
+    }
 }
 
 function addRectFromLine(l, context_) {
@@ -71,12 +71,12 @@ function addRectFromLine(l, context_) {
 
 
 
-    if(rw <= 1) rw = 1;
-    if(rh <= 1) rh = 1;
+    if (rw <= 1) rw = 1;
+    if (rh <= 1) rh = 1;
 
     var rect = MSRectangleShape.alloc().init();
     rect.frame = MSRect.rectWithRect(NSMakeRect(rx, ry, rw, rh));
-    rect.name = "RechtLine";
+    rect.name = "Line R";
 
     var fill = rect.style().addStylePartOfType(0);
     fill.color = MSImmutableColor.colorWithSVGString("#d8d8d8");
@@ -84,8 +84,9 @@ function addRectFromLine(l, context_) {
 
 
     var container = l.parentGroup();
-    if(container.class() != "MSPage"){
+    if (container.class() != "MSPage") {
         container.addLayer(rect);
+        ga(context_, "Line2Rect");
     }
 
     //Thanks:
@@ -93,9 +94,8 @@ function addRectFromLine(l, context_) {
     // PS; idk why the docs dont mention this. l.remove(); would be to obvious...
     l.removeFromParent();
 
-    // context_.actionContext.document.showMessage("shape drawn line");
+    context_.actionContext.document.showMessage("shape drawn line");
 }
-
 
 
 
@@ -104,6 +104,7 @@ function addRectFromLine(l, context_) {
 function openUrlInBrowser(url) {
     NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
 }
+
 function website(context) {
     console.log("open");
     openUrlInBrowser("http://kevinvanbreemaat.nl/");
@@ -169,7 +170,8 @@ function ga(context, eventCategory) {
     // }
 
     var session = NSURLSession.sharedSession();
-    var task = session.dataTaskWithURL(NSURL.URLWithString(NSString.stringWithString(url)));
+    var task = session.dataTaskWithURL(NSURL.URLWithString(NSString.stringWithString(
+        url)));
     task.resume();
 
 }
