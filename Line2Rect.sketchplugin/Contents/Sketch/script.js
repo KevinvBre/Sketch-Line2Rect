@@ -1,4 +1,4 @@
-/*  2019.02.12, By: Kevin van Breemaat, kevinvanbreemaat.nl     */
+/*  2019.02.21, By: Kevin van Breemaat, kevinvanbreemaat.nl     */
 
 let td = NSThread.mainThread().threadDictionary();
 
@@ -36,21 +36,18 @@ function SelectionChanged(context_) {
         td.lineCount = 0;
 
         var l = context_.actionContext.oldSelection[0];
-        // thanks
-        // https://sketchplugins.com/d/389-x1-x2-y1-y2-values-from-a-line/5
-        if (l.x1() == l.x2()) {
-            addRectFromLine(l, context_);
-            // context_.actionContext.document.showMessage("vertical line");
-        } else if (l.y1() == l.y2()) {
-            addRectFromLine(l, context_);
-            // context_.actionContext.document.showMessage("horizontal line");
+
+        // thanks // https://sketchplugins.com/d/389-x1-x2-y1-y2-values-from-a-line/5
+        if (l.x1() == l.x2()) { //vertical lines
+            if (l.y1() <= l.y2())addRectFromLine(l, context_, 0);       // left right
+            if (l.y1() >= l.y2())addRectFromLine(l, context_, 1);       // right left
+        } else if (l.y1() == l.y2()) { //horizontal lines
+            if (l.x1() <= l.x2()) addRectFromLine(l, context_, 0);      // top down
+            if (l.x1() >= l.x2())addRectFromLine(l, context_, 1);       // down up
         } else {
-            // context_.actionContext.document.showMessage("not a straight line");
+            context_.actionContext.document.showMessage("not a straight line");
         }
 
-
-
-        ga(context_, "Line2RectComp");
     }
     if (td.lineState == 'true') {
         // context_.actionContext.document.showMessage("SelectionChanged drawn1");
@@ -58,7 +55,7 @@ function SelectionChanged(context_) {
     }
 }
 
-function addRectFromLine(l, context_) {
+function addRectFromLine(l, context_, ver) {
     // thanks:
     // https://sketchplugins.com/d/432-insert-new-layer-underneath-other-layers/4
     // https://sketchplugins.com/d/56-drawing-shapes-programmatically/2
@@ -69,32 +66,25 @@ function addRectFromLine(l, context_) {
     var rw = Math.round(Math.abs(l.x1() - l.x2()));
     var rh = Math.round(Math.abs(l.y1() - l.y2()));
 
-
-
     if (rw <= 1) rw = 1;
     if (rh <= 1) rh = 1;
 
+    // make a rect
     var rect = MSRectangleShape.alloc().init();
-    rect.frame = MSRect.rectWithRect(NSMakeRect(rx, ry, rw, rh));
+    if(ver == 0)rect.frame = MSRect.rectWithRect(NSMakeRect(rx, ry, rw, rh));
+    if(ver == 1)rect.frame = MSRect.rectWithRect(NSMakeRect(rx - rw, ry - rh, rw, rh));
     rect.name = "Line R";
-
     var fill = rect.style().addStylePartOfType(0);
     fill.color = MSImmutableColor.colorWithSVGString("#d8d8d8");
 
-
-
     var container = l.parentGroup();
-    if (container.class() != "MSPage") {
+
+    if (container != "null" && container.class() != "MSPage") { // if on artboard
         container.addLayer(rect);
-        ga(context_, "Line2Rect");
+        l.removeFromParent(); //Thanks:// https://github.com/Ashung/Automate-Sketch // PS; idk why the docs dont mention this. l.remove(); would be to obvious...
+        context_.actionContext.document.showMessage("shape drawn line");
+        ga(context_, "Line2RectComp");
     }
-
-    //Thanks:
-    // https://github.com/Ashung/Automate-Sketch
-    // PS; idk why the docs dont mention this. l.remove(); would be to obvious...
-    l.removeFromParent();
-
-    context_.actionContext.document.showMessage("shape drawn line");
 }
 
 
